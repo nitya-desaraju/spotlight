@@ -45,6 +45,9 @@
             color: white;
             border-color: #aa1f36;
         }
+        .paw-level-cell {
+            min-width: 120px; /* Ensures space for paws and animal badge */
+        }
     </style>
 </head>
 <body>
@@ -78,7 +81,7 @@
                 <h2 class="text-2xl font-bold text-[#333333]">Urgent</h2>
                 <div id="info-tooltip-container" class="relative">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500 cursor-pointer hover:text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 M-18 0 9 9 0 0118 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div id="info-tooltip" class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-[#333333] text-white text-sm rounded-lg shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-10">
                         Highlights high-priority 'Volunteer-Dependent' activities in the next 7 days that are 50% full or less.
@@ -121,7 +124,7 @@
                                 <th scope="col" class="px-6 py-3">Activity</th>
                                 <th scope="col" class="px-6 py-3">Date</th>
                                 <th scope="col" class="px-6 py-3 whitespace-nowrap">Time</th>
-                                <th scope="col" class="px-6 py-3 whitespace-nowrap min-w-[100px]">Paw Level</th>
+                                <th scope="col" class="px-6 py-3 whitespace-nowrap">Paw Level</th>
                                 <th scope="col" class="px-6 py-3">Availability</th>
                                 <th scope="col" class="px-6 py-3">Details</th>
                             </tr>
@@ -276,7 +279,6 @@
                             startDateTime.setHours(hours, minutes, 0, 0);
                         }
                     }
-                    // The 'animal' property comes directly from the CSV
                     return { ...e, eventDate, openShifts, totalShifts, fillRate, startDateTime, isUrgent };
                 }).filter(e => e.startDateTime && e.startDateTime >= now && !isNaN(e.startDateTime.getTime()) && e.openShifts > 0)
                   .sort((a, b) => a.startDateTime - b.startDateTime);
@@ -370,7 +372,7 @@
                         <th scope="row" class="px-6 py-4 font-medium text-[#333333] whitespace-nowrap">${event.activity}</th>
                         <td class="px-6 py-4">${event.eventDate.toLocaleDateString()}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${event.time}</td>
-                        <td class="px-6 py-4">${generatePawIcons(event.pawlevel, event.animal)}</td>
+                        <td class="px-6 py-4 paw-level-cell">${generatePawIcons(event.pawlevel, event.animal)}</td>
                         <td class="px-6 py-4"><span class="font-semibold ${event.openShifts > 0 ? 'text-green-600' : 'text-red-600'}">${event.openShifts} / ${event.totalShifts}</span></td>
                         <td class="px-6 py-4"><a href="${event.details}" target="_blank" rel="noopener noreferrer" class="font-medium text-[#aa1f36] hover:underline">Details</a></td>
                     </tr>
