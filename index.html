@@ -78,7 +78,7 @@
                 <h2 class="text-2xl font-bold text-[#333333]">Urgent</h2>
                 <div id="info-tooltip-container" class="relative">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500 cursor-pointer hover:text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 M-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div id="info-tooltip" class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-[#333333] text-white text-sm rounded-lg shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-10">
                         Highlights high-priority 'Volunteer-Dependent' activities in the next 7 days that are 50% full or less.
@@ -165,12 +165,21 @@
 
             const loader = document.getElementById('loader');
 
-            function generatePawIcons(level) {
+            function generatePawIcons(level, animal) {
                 const pawLevel = parseInt(level, 10) || 0;
                 if (pawLevel === 0) return '0 Paw';
-                return Array.from({ length: pawLevel }, () => 
+                
+                let icons = Array.from({ length: pawLevel }, () => 
                     `<img src="${PAW_ICON_URL}" alt="Paw icon" class="w-5 h-5 inline-block mx-px">`
                 ).join('');
+
+                if (animal === 'Dog') {
+                    icons += `<span class="ml-2 inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full align-middle">Dog</span>`;
+                } else if (animal === 'Cat') {
+                    icons += `<span class="ml-2 inline-block bg-purple-100 text-purple-800 text-xs font-semibold px-2 py-0.5 rounded-full align-middle">Cat</span>`;
+                }
+                
+                return `<div class="flex items-center">${icons}</div>`;
             }
 
             function getCsvUrl(sheetUrl, sheetName) {
@@ -225,11 +234,6 @@
             function parseCSV(text) {
                 const rows = text.split('\n').map(row => row.trim().slice(1, -1).split('","'));
                 if (rows.length > 0 && rows[0][0] === 'Last Updated:') {
-                    const timestamp = rows[0][1];
-                    const subtitle = document.getElementById('last-updated-subtitle');
-                    if (subtitle && timestamp) {
-                        subtitle.textContent = `Last updated: ${timestamp}`;
-                    }
                     rows.shift();
                 }
                 const headers = rows.shift();
@@ -258,7 +262,7 @@
                     const totalShifts = parseInt(e.totalshifts, 10) || 0;
                     const fillRate = totalShifts > 0 ? (totalShifts - openShifts) / totalShifts : 1;
                     const isUrgent = e.isurgent?.toLowerCase() === 'true';
-
+                    
                     let startDateTime = null;
                     if (e.time) {
                         const timeMatch = e.time.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
@@ -272,6 +276,7 @@
                             startDateTime.setHours(hours, minutes, 0, 0);
                         }
                     }
+                    // The 'animal' property comes directly from the CSV
                     return { ...e, eventDate, openShifts, totalShifts, fillRate, startDateTime, isUrgent };
                 }).filter(e => e.startDateTime && e.startDateTime >= now && !isNaN(e.startDateTime.getTime()) && e.openShifts > 0)
                   .sort((a, b) => a.startDateTime - b.startDateTime);
@@ -340,7 +345,7 @@
                                 <a href="${event.details}" target="_blank" rel="noopener noreferrer" class="inline-block text-[#aa1f36] hover:text-[#86192a] font-semibold text-sm">View Details &rarr;</a>
                             </div>
                             <div title="Paw Level: ${event.pawlevel}">
-                                ${generatePawIcons(event.pawlevel)}
+                                ${generatePawIcons(event.pawlevel, event.animal)}
                             </div>
                         </div>
                     </div>
@@ -365,7 +370,7 @@
                         <th scope="row" class="px-6 py-4 font-medium text-[#333333] whitespace-nowrap">${event.activity}</th>
                         <td class="px-6 py-4">${event.eventDate.toLocaleDateString()}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${event.time}</td>
-                        <td class="px-6 py-4">${generatePawIcons(event.pawlevel)}</td>
+                        <td class="px-6 py-4">${generatePawIcons(event.pawlevel, event.animal)}</td>
                         <td class="px-6 py-4"><span class="font-semibold ${event.openShifts > 0 ? 'text-green-600' : 'text-red-600'}">${event.openShifts} / ${event.totalShifts}</span></td>
                         <td class="px-6 py-4"><a href="${event.details}" target="_blank" rel="noopener noreferrer" class="font-medium text-[#aa1f36] hover:underline">Details</a></td>
                     </tr>
